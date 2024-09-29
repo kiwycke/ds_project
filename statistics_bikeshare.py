@@ -52,6 +52,31 @@ class StatisticsBikeshare:
     months_num = ['1', '2', '3', '4', '5', '6']
 
     week_days = {'m': 'Monday', 't': 'Tuesday', 'w': 'Wednesday', 'th': 'Thursday', 'f': 'Friday', 's': 'Saturday', 'su': 'Sunday'}
+
+    bulk = False
+
+    def not_bulk(self):
+        input("Press Enter to continue...\n\n\n")
+
+    def bulk_check(self):
+        """Checks if user want bulk data or not."""
+        while True:
+            try:
+                restart = input('\nDo you want for statistics in bulk? Enter (y)yes or (n)no.\n')
+                if restart.lower() == 'yes' or restart.lower() == 'y':
+                    self.bulk = True
+                    print('Let\'s go with bulk statistics!')
+                    print('-'*48+'\n')
+                    break
+                elif restart.lower() == 'no' or restart.lower() == 'n':
+                    print('Let\'s go with statistics sequentially!')
+                    print('-'*48+'\n')
+                    break
+                else:
+                    raise InvalidInput
+            except InvalidInput:
+                print('\n  !! Type valid input please !! (eg.: \'y\' | \'yes\' | \'n\' | \'no\')\n\n')
+                continue
     
     def map_input_to_days(self, days):
         """Filter helper function (replaces 'a', 'wdays' and 'wends' inputs to days' keys)"""
@@ -109,6 +134,7 @@ class StatisticsBikeshare:
         print('| Hello! Let\'s explore some US bikeshare data! |')
         print('-'*48+'\n\n')
 
+        self.bulk_check()
         if not self.want_filter():
             # set default values for cities, months, days
             cities = set(self.city_letters.values())
@@ -184,7 +210,8 @@ class StatisticsBikeshare:
 
         print('Current filters:\n  Cities: {}\n  Months: {}\n  Days: {}'.format(sorted(cities), sorted(months), sorted(days)))
         print('='*48)
-        input("Press Enter to continue...\n\n\n")
+        if not self.bulk:
+            self.not_bulk()
         return cities, months, days
 
 
@@ -256,7 +283,8 @@ class StatisticsBikeshare:
 
         print("This took %s seconds." % (time.time() - start_time))
         print('-'*48)
-        input("Press Enter to continue...\n\n\n")
+        if not self.bulk:
+            self.not_bulk()
 
     def station_stats(self, df):
         """Displays statistics on the most popular stations and trip."""
@@ -290,7 +318,8 @@ class StatisticsBikeshare:
 
         print("This took %s seconds." % (time.time() - start_time))
         print('-'*48)
-        input("Press Enter to continue...\n\n\n")
+        if not self.bulk:
+            self.not_bulk()
 
     def trip_duration_stats(self, df):
         """Displays statistics on the total and average trip duration."""
@@ -315,7 +344,8 @@ class StatisticsBikeshare:
         else:
             print('No trip duration data to share.')
             print('-'*10)
-        input("Press Enter to continue...\n\n\n")
+        if not self.bulk:
+            self.not_bulk()
 
     def user_stats(self, df):
         """Displays statistics on bikeshare users."""
