@@ -59,7 +59,7 @@ class StatisticsBikeshare:
         input("Press Enter to continue...\n\n\n")
 
     def bulk_check(self):
-        """Checks if user want bulk data or not."""
+        """Checks if user want statistics in bulk or sequentially."""
         while True:
             try:
                 restart = input('\nDo you want for statistics in bulk? Enter (y)yes or (n)no.\n')
@@ -69,6 +69,7 @@ class StatisticsBikeshare:
                     print('-'*48+'\n')
                     break
                 elif restart.lower() == 'no' or restart.lower() == 'n':
+                    self.bulk = False
                     print('Let\'s go with statistics sequentially!')
                     print('-'*48+'\n')
                     break
