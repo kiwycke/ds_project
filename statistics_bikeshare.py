@@ -37,11 +37,6 @@ Plot for Avg. Trip Duration by Month distributed by Gender
 ----------------------------------------
 '''
 
-# define Python user-defined exceptions
-'''class InvalidInput(Exception):
-    "Raised when the input is none of the options."
-    pass'''
-
 class InvalidInput(Exception):
     "Raised when the input is none of the options."
     msg = 'InvalidInput'
