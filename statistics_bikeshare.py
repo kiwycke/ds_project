@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-"""
+'''
 Statistics Computed
 
 #1 Popular times of travel (i.e., occurs most often in the start time)
@@ -35,12 +35,18 @@ earliest, most recent, most common year of birth (only available for NYC and Chi
 average trip duration by month distributed by gender
 Plot for Avg. Trip Duration by Month distributed by Gender
 ----------------------------------------
-"""
+'''
 
 # define Python user-defined exceptions
+'''class InvalidInput(Exception):
+    "Raised when the input is none of the options."
+    pass'''
+
 class InvalidInput(Exception):
     "Raised when the input is none of the options."
-    pass
+    msg = 'InvalidInput'
+    def __str__(self):
+        return self.msg
 
 class StatisticsBikeshare:
     CITY_DATA = { 'chicago': 'chicago.csv',
@@ -61,26 +67,26 @@ class StatisticsBikeshare:
         input("Press Enter to continue...\n\n\n")
 
     def bulk_check(self):
-        """Checks if user want statistics in bulk or sequentially."""
+        '''Checks if user want statistics in bulk or sequentially.'''
         while True:
             try:
-                restart = input('\nDo you want for statistics in bulk? Enter (y)yes or (n)no.\n')
-                if restart.lower() == 'yes' or restart.lower() == 'y':
+                inp = input('\nDo you want for statistics in bulk? Enter (y)yes or (n)no.\n')
+                if inp.lower() == 'yes' or inp.lower() == 'y':
                     self.bulk = True
                     print('Let\'s go with bulk statistics!\n'+'-'*48+'\n')
                     break
-                elif restart.lower() == 'no' or restart.lower() == 'n':
+                elif inp.lower() == 'no' or inp.lower() == 'n':
                     self.bulk = False
                     print('Let\'s go with statistics sequentially!\n'+'-'*48+'\n')
                     break
                 else:
                     raise InvalidInput
             except InvalidInput:
-                print('\n  !! Type valid input please !! (eg.: \'y\' | \'yes\' | \'n\' | \'no\')\n\n')
+                print('\n!! Type valid input please !! (eg.: \'y\' | \'yes\' | \'n\' | \'no\')\n\n'+'-'*48+'\n')
                 continue
     
     def map_input_to_days(self, days):
-        """Filter helper function (replaces 'a', 'wdays' and 'wends' inputs to days' keys)"""
+        '''Filter helper function (replaces 'a', 'wdays' and 'wends' inputs to days' keys)'''
         if 'a' in days:
             days.remove('a')
             days.update(self.week_days.keys())
@@ -93,42 +99,41 @@ class StatisticsBikeshare:
         return days
 
     def col_check(self, col_name):
-        """Checks if column is part of the dataframe."""
+        '''Checks if column is part of the dataframe.'''
         return col_name in list(self.df.columns)
 
     def want_filter(self):
-        """Checks if user want unique filters."""
+        '''Checks if user want unique filters.'''
         while True:
             try:
-                restart = input('\nDo you want to filter data? Enter (y)yes or (n)no.\n')
-                if restart.lower() == 'yes' or restart.lower() == 'y':
+                inp = input('\nDo you want to filter data? Enter (y)yes or (n)no.\n')
+                if inp.lower() == 'yes' or inp.lower() == 'y':
                     print('Let\'s filter data!\n'+'-'*48+'\n')
                     return True
-                elif restart.lower() == 'no' or restart.lower() == 'n':
+                elif inp.lower() == 'no' or inp.lower() == 'n':
                     print('Using default filters (each city, months and days)!\n'+'-'*48+'\n')
                     return False
                 else:
                     raise InvalidInput
             except InvalidInput:
-                print('\n  !! Type valid input please !! (eg.: \'y\' | \'yes\' | \'n\' | \'no\')\n\n')
+                print('\n!! Type valid input please !! (eg.: \'y\' | \'yes\' | \'n\' | \'no\')\n\n'+'-'*48+'\n')
                 continue
 
     def get_filters(self):
-        """
-        Asks user to specify a cities, months, and days to analyze.
+        '''
+        Asks user
+            - if they want to see statistics in bulk or sequentially
+            - if they want to specify filters for a cities, months, and days to analyze
+                - if they don't than statistics will be shown for each city, month and day
+                - otherwise they can specify unique filters
 
         Returns:
-            (set) cites     - first characters of names of the cities to analyze,
-                            - 'a' to apply no city filter
+            (set) cites     - names of the cities to analyze,
 
             (set) months    - numbers of the months to filter by,
-                            - 'a' to apply no month filter
 
-            (set) days      - first letters names of the days of week to filter by,
-                            - 'wends' to filter by weekends,
-                            - 'wdays' to filter by weekdays,
-                            - 'a' to apply no day filter
-        """
+            (set) days      - names of the days to filter by
+        '''
         print('\n'+'-'*48+'\n| Hello! Let\'s explore some US bikeshare data! |\n'+'-'*48+'\n')
 
 
@@ -179,7 +184,7 @@ class StatisticsBikeshare:
                     else:
                         raise InvalidInput
                 except InvalidInput:
-                    print('\n  !! Type valid input please !! (eg.: \'1 2 3 4 5 6\')\n\n')
+                    print('\n!! Type valid input please !! (eg.: \'1 2 3 4 5 6\')\n\n'+'-'*48+'\n')
                     continue
             print('-'*48+'\n')
 
@@ -202,34 +207,30 @@ class StatisticsBikeshare:
                     else:
                         raise InvalidInput
                 except InvalidInput:
-                    print('\n  !! Type valid input please !! (eg.: \'m t w th f s su\')\n\n')
+                    print('\n!! Type valid input please !! (eg.: \'m t w th f s su\')\n\n'+'-'*48+'\n')
                     continue
             print('-'*48+'\n')
 
-        print('Current filters:\n  Cities: {}\n  Months: {}\n  Days: {}\n'.format(sorted(cities), sorted(months), sorted(days))+'='*48)
+        print('Current filters:\n  Cities: {}\n  Months: {}\n  Days: {}\n'.format(sorted(cities), sorted(months), sorted(days))+'='*48+'\n')
         if not self.bulk:
             self.not_bulk()
         return cities, months, days
 
 
     def load_data(self, cities, months, days):
-        """
+        '''
         Loads data for the specified cities and filters by month(s) and day(s) if applicable.
 
         Args:
-            (set) cites     - first characters of names of the cities to analyze,
-                            - 'a' to apply no city filter
+            (set) cites     - names of the cities to analyze,
 
             (set) months    - numbers of the months to filter by,
-                            - 'a' to apply no month filter
 
-            (set) days      - first letters names of the days of week to filter by,
-                            - 'wends' to filter by weekends,
-                            - 'wdays' to filter by weekdays,
-                            - 'a' to apply no day filter
+            (set) days      - names of the days to filter by
+
         Returns:
-            df - Pandas DataFrame containing specified cities data filtered by month(s) and day(s)
-        """
+            df - Pandas DataFrame containing specified cities' data filtered by month(s) and day(s)
+        '''
         # load data file into a dataframe
         self.df = pd.concat((pd.read_csv(self.CITY_DATA[city]) for city in list(cities)), ignore_index=True)
 
@@ -253,7 +254,7 @@ class StatisticsBikeshare:
 
 
     def time_stats(self):
-        """Displays statistics on the most frequent times of travel."""
+        '''Displays statistics on the most frequent times of travel.'''
 
         print('| Calculating The Most Frequent Times of Travel... |\n\n')
         start_time = time.time()
@@ -273,12 +274,12 @@ class StatisticsBikeshare:
         else:
             print('No day data to share.\n'+'-'*10)
 
-        print("This took %s seconds.\n" % (time.time() - start_time)+'-'*48+'\n')
+        print("This took %s seconds.\n" % (time.time() - start_time)+'-'*48)
         if not self.bulk:
             self.not_bulk()
 
     def station_stats(self):
-        """Displays statistics on the most popular stations and trip."""
+        '''Displays statistics on the most popular stations and trip.'''
 
         print('| Calculating The Most Popular Stations and Trip... |\n\n')
         start_time = time.time()
@@ -306,7 +307,7 @@ class StatisticsBikeshare:
             self.not_bulk()
 
     def trip_duration_stats(self):
-        """Displays statistics on the total and average trip duration."""
+        '''Displays statistics on the total and average trip duration.'''
 
         print('| Calculating Trip Duration... |\n\n')
         start_time = time.time()
@@ -328,26 +329,26 @@ class StatisticsBikeshare:
             self.not_bulk()
 
     def user_stats(self):
-        """Displays statistics on bikeshare users."""
+        '''Displays statistics on bikeshare users.'''
 
         print('|  Calculating User Stats...  |\n')
         start_time = time.time()
 
-        # Display counts of user types
         if self.col_check('User Type'):
+            # display counts of user types
             print('Counts of User Types:\n  {}\n'.format(self.df.groupby(['User Type'])['User Type'].count())+'-'*10)
         else:
             print('No user type data to share.\n'+'-'*10)
 
-        # Display counts of gender
         if self.col_check('Gender'):
+            # display counts of gender
             print('Counts of Gender:\n  {}\n'.format(self.df.groupby(['Gender'])['Gender'].count())+'-'*10)
         else:
             print('No gender data to share.\n'+'-'*10)
 
 
-        # Display earliest, most recent, and most common year of birth
         if self.col_check('Birth Year'):
+            # display earliest, most recent, and most common year of birth
             print('Earliest year of birth among participants:\n  {}\n'.format(self.df['Birth Year'].min())+'-'*10)
             print('Most recent year of birth among participants:\n  {}\n'.format(self.df['Birth Year'].max())+'-'*10)
             print('Most common year of birth among participants:\n  {}\n'.format(self.df['Birth Year'].mode()[0])+'-'*10)
@@ -355,13 +356,13 @@ class StatisticsBikeshare:
             print('No birth year data to share.\n'+'-'*10)
 
         if self.col_check('Gender') and self.col_check('Trip Duration') and self.col_check('Month'):
-            # Average trip duration by month distributed by gender
+            # average trip duration by month distributed by gender
             print('Avg. Trip Duration by Month distributed by Gender:\n  {}\n'.format(self.df.groupby(['Gender', 'Month'])['Trip Duration'].mean())+'-'*10)
 
-            # Creating new DataFrame for transparency 
+            # areating new DataFrame for transparency 
             df_gender = pd.DataFrame(self.df.groupby(['Gender', 'Month'])['Trip Duration'].mean()).reset_index()
 
-            # Plot for Avg. Trip Duration by Month distributed by Gender
+            # plot for Avg. Trip Duration by Month distributed by Gender
             plt.plot(df_gender['Month'].loc[df_gender['Gender'] == 'Female'], df_gender['Trip Duration'].loc[df_gender['Gender'] == 'Female'], 'g.-', label = 'Female')
             plt.plot(df_gender['Month'].loc[df_gender['Gender'] == 'Male'], df_gender['Trip Duration'].loc[df_gender['Gender'] == 'Male'], 'b.-', label = 'Male')
             plt.title('Avg.Trip Duration by Month\nFemale vs Male')
@@ -394,7 +395,7 @@ class StatisticsBikeshare:
                 else:
                     raise InvalidInput
             except InvalidInput:
-                print('\n  !! Type valid input please !! (eg.: \'y\' | \'yes\' | \'n\' | \'no\')\n\n')
+                print('!! Type valid input please !! (eg.: \'y\' | \'yes\' | \'n\' | \'no\')\n\n'+'-'*48+'\n')
                 continue
 
 if __name__ == "__main__":
