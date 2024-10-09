@@ -125,6 +125,9 @@ class StatisticsBikeshare:
         """Converts birth year to age"""
         return datetime.today().year - birth_year
 
+    def secure_input(self, input_set):
+        return set(input_set.lower() for input_set in input_set)
+
     def get_filters(self):
         """
         Asks user
@@ -155,7 +158,7 @@ class StatisticsBikeshare:
                 try:
                     print('Which cities\' data are you interested in?\n  - (c)Chicago,\n  - (n)New York City,\n  - (w)Washington\n  - (a)All\n')
                     cities = set(input('Type here (separated by space): ').split())
-                    cities = set(city.lower() for city in cities)
+                    cities = self.secure_input(cities)
 
                     tmp = set()
                     if not cities:
@@ -180,7 +183,7 @@ class StatisticsBikeshare:
                 try:
                     print('Which months\' data are you interested in?\n  - (a)All  (1)Jan  (2)Feb  (3)March  (4)Apr  (5)May  (6)June\n')
                     months = set(input('Type here (separated by space): ').split())
-                    months = set(month.lower() for month in months)
+                    months = self.secure_input(months)
 
                     if not months:
                         raise InvalidInput
@@ -202,7 +205,7 @@ class StatisticsBikeshare:
                     print('Which days\' data are you interested in?')
                     print('Options:\n  - (m)Monday  (t)Tuesday  (w)Wednesday  (th)Thursday  (f)Friday  (s)Saturday  (su)Sunday\n    (wdays)Weekdays  (wends)Weekends  (a)all\n')
                     days = set(input('Type here (separated by space): ').split())
-                    days = set(day.lower() for day in days)
+                    days = self.secure_input(days)
                     days = self.map_input_to_days(days)
 
                     tmp = set()
