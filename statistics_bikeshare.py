@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import os
 from datetime import datetime, date
 
-'''
+"""
 Statistics Computed
 
 #1 Popular times of travel (i.e., occurs most often in the start time)
@@ -38,7 +38,7 @@ plot for Avg. Trip Duration by Month distributed by Gender
 earliest, most recent, and most common year of birth
 plot for Avg. Trip Duration distributed by age groups
 ----------------------------------------
-'''
+"""
 
 class InvalidInput(Exception):
     "Raised when the input is none of the options."
@@ -69,7 +69,7 @@ class StatisticsBikeshare:
         input("Press Enter to continue...\n\n\n")
 
     def bulk_check(self):
-        '''Checks if user want statistics in bulk or sequentially.'''
+        """Checks if user want statistics in bulk or sequentially."""
         while True:
             try:
                 inp = input('\nDo you want for statistics in bulk? Enter (y)yes or (n)no.\n')
@@ -88,7 +88,7 @@ class StatisticsBikeshare:
                 continue
     
     def map_input_to_days(self, days):
-        '''Filter helper function (replaces 'a', 'wdays' and 'wends' inputs to days' keys)'''
+        """Filter helper function (replaces 'a', 'wdays' and 'wends' inputs to days' keys)"""
         if 'a' in days:
             days.remove('a')
             days.update(self.week_days.keys())
@@ -101,11 +101,11 @@ class StatisticsBikeshare:
         return days
 
     def col_check(self, col_name):
-        '''Checks if column is part of the dataframe.'''
+        """Checks if column is part of the dataframe."""
         return col_name in list(self.df.columns)
 
     def want_filter(self):
-        '''Checks if user want unique filters.'''
+        """Checks if user want unique filters."""
         while True:
             try:
                 inp = input('\nDo you want to filter data? Enter (y)yes or (n)no.\n')
@@ -122,11 +122,14 @@ class StatisticsBikeshare:
                 continue
 
     def to_age(self, birth_year):
-        '''Converts birth year to age'''
+        """Converts birth year to age"""
         return datetime.today().year - birth_year
 
+    def secure_input(self, input_set):
+        return set(input_set.lower() for input_set in input_set)
+
     def get_filters(self):
-        '''
+        """
         Asks user
             - if they want to see statistics in bulk or sequentially
             - if they want to specify filters for a cities, months, and days to analyze
@@ -139,7 +142,7 @@ class StatisticsBikeshare:
             (set) months    - numbers of the months to filter by,
 
             (set) days      - names of the days to filter by
-        '''
+        """
         print('\n'+'-'*48+'\n| Hello! Let\'s explore some US bikeshare data! |\n'+'-'*48+'\n')
 
 
@@ -155,7 +158,7 @@ class StatisticsBikeshare:
                 try:
                     print('Which cities\' data are you interested in?\n  - (c)Chicago,\n  - (n)New York City,\n  - (w)Washington\n  - (a)All\n')
                     cities = set(input('Type here (separated by space): ').split())
-                    cities = set(city.lower() for city in cities)
+                    cities = self.secure_input(cities)
 
                     tmp = set()
                     if not cities:
@@ -180,7 +183,7 @@ class StatisticsBikeshare:
                 try:
                     print('Which months\' data are you interested in?\n  - (a)All  (1)Jan  (2)Feb  (3)March  (4)Apr  (5)May  (6)June\n')
                     months = set(input('Type here (separated by space): ').split())
-                    months = set(month.lower() for month in months)
+                    months = self.secure_input(months)
 
                     if not months:
                         raise InvalidInput
@@ -202,7 +205,7 @@ class StatisticsBikeshare:
                     print('Which days\' data are you interested in?')
                     print('Options:\n  - (m)Monday  (t)Tuesday  (w)Wednesday  (th)Thursday  (f)Friday  (s)Saturday  (su)Sunday\n    (wdays)Weekdays  (wends)Weekends  (a)all\n')
                     days = set(input('Type here (separated by space): ').split())
-                    days = set(day.lower() for day in days)
+                    days = self.secure_input(days)
                     days = self.map_input_to_days(days)
 
                     tmp = set()
@@ -227,7 +230,7 @@ class StatisticsBikeshare:
 
 
     def load_data(self, cities, months, days):
-        '''
+        """
         Loads data for the specified cities and filters by month(s) and day(s) if applicable.
 
         Parameters:
@@ -239,7 +242,7 @@ class StatisticsBikeshare:
 
         Returns:
             df - Pandas DataFrame containing specified cities' data filtered by month(s) and day(s)
-        '''
+        """
         # load data file into a dataframe
         self.df = pd.concat((pd.read_csv(self.CITY_DATA[city]) for city in list(cities)), ignore_index=True)
 
@@ -268,7 +271,7 @@ class StatisticsBikeshare:
 
 
     def time_stats(self):
-        '''Displays statistics on the most frequent times of travel.'''
+        """Displays statistics on the most frequent times of travel."""
 
         print('| Calculating The Most Frequent Times of Travel... |\n\n')
         start_time = time.time()
@@ -293,7 +296,7 @@ class StatisticsBikeshare:
             self.not_bulk()
 
     def station_stats(self):
-        '''Displays statistics on the most popular stations and trip.'''
+        """Displays statistics on the most popular stations and trip."""
 
         print('| Calculating The Most Popular Stations and Trip... |\n\n')
         start_time = time.time()
@@ -321,7 +324,7 @@ class StatisticsBikeshare:
             self.not_bulk()
 
     def trip_duration_stats(self):
-        '''Displays statistics on the total and average trip duration.'''
+        """Displays statistics on the total and average trip duration."""
 
         print('| Calculating Trip Duration... |\n\n')
         start_time = time.time()
@@ -343,7 +346,7 @@ class StatisticsBikeshare:
             self.not_bulk()
 
     def user_stats(self):
-        '''Displays statistics on bikeshare users.'''
+        """Displays statistics on bikeshare users."""
 
         print('|  Calculating User Stats...  |\n')
         start_time = time.time()

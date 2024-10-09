@@ -152,6 +152,25 @@ class TestStatisticsBikeshare(ut.TestCase):
 
 		print('='*24+' END Testing get_filters() ' + '='*24 + '\n')
 
+	def test_secure_input(self):
+		print('='*24+' Testing secure_input() ' + '='*24)
+
+		bike_stat = StatisticsBikeshare()
+
+		input_cities_0 = {'W', 'N'}
+		expected_cities_0 = {'w', 'n'}
+		self.assertEqual(bike_stat.secure_input(input_cities_0), expected_cities_0)
+
+		input_months_0 = {'A', '1', '5'}
+		expected_months_0 = {'a', '1', '5'}
+		self.assertEqual(bike_stat.secure_input(input_months_0), expected_months_0)
+
+		input_days_0 = {'M', 'tH'}
+		expected_days_0 = {'m', 'th'}
+		self.assertEqual(bike_stat.secure_input(input_days_0), expected_days_0)
+
+		print('='*24+' END Testing secure_input() ' + '='*24)
+
 
 if __name__ == '__main__':
     ut.main()
