@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+from datetime import datetime, date
 
 '''
 Statistics Computed
@@ -33,7 +34,9 @@ counts of each user type
 counts of each gender (only available for NYC and Chicago)
 earliest, most recent, most common year of birth (only available for NYC and Chicago)
 average trip duration by month distributed by gender
-Plot for Avg. Trip Duration by Month distributed by Gender
+plot for Avg. Trip Duration by Month distributed by Gender
+earliest, most recent, and most common year of birth
+plot for Avg. Trip Duration distributed by age groups
 ----------------------------------------
 '''
 
@@ -57,6 +60,10 @@ class StatisticsBikeshare:
     bulk = False
 
     df = pd.DataFrame()
+
+    start = 0
+
+    stop = 5
 
     def not_bulk(self):
         input("Press Enter to continue...\n\n\n")
@@ -114,6 +121,10 @@ class StatisticsBikeshare:
                 print('\n!! Type valid input please !! (eg.: \'y\' | \'yes\' | \'n\' | \'no\')\n\n'+'-'*48+'\n')
                 continue
 
+    def to_age(self, birth_year):
+        '''Converts birth year to age'''
+        return datetime.today().year - birth_year
+
     def get_filters(self):
         '''
         Asks user
@@ -144,6 +155,7 @@ class StatisticsBikeshare:
                 try:
                     print('Which cities\' data are you interested in?\n  - (c)Chicago,\n  - (n)New York City,\n  - (w)Washington\n  - (a)All\n')
                     cities = set(input('Type here (separated by space): ').split())
+                    cities = set(city.lower() for city in cities)
 
                     tmp = set()
                     if not cities:
@@ -168,6 +180,7 @@ class StatisticsBikeshare:
                 try:
                     print('Which months\' data are you interested in?\n  - (a)All  (1)Jan  (2)Feb  (3)March  (4)Apr  (5)May  (6)June\n')
                     months = set(input('Type here (separated by space): ').split())
+                    months = set(month.lower() for month in months)
 
                     if not months:
                         raise InvalidInput
@@ -189,6 +202,7 @@ class StatisticsBikeshare:
                     print('Which days\' data are you interested in?')
                     print('Options:\n  - (m)Monday  (t)Tuesday  (w)Wednesday  (th)Thursday  (f)Friday  (s)Saturday  (su)Sunday\n    (wdays)Weekdays  (wends)Weekends  (a)all\n')
                     days = set(input('Type here (separated by space): ').split())
+                    days = set(day.lower() for day in days)
                     days = self.map_input_to_days(days)
 
                     tmp = set()
@@ -216,7 +230,7 @@ class StatisticsBikeshare:
         '''
         Loads data for the specified cities and filters by month(s) and day(s) if applicable.
 
-        Args:
+        Parameters:
             (set) cites     - names of the cities to analyze,
 
             (set) months    - numbers of the months to filter by,
@@ -229,12 +243,17 @@ class StatisticsBikeshare:
         # load data file into a dataframe
         self.df = pd.concat((pd.read_csv(self.CITY_DATA[city]) for city in list(cities)), ignore_index=True)
 
-        # convert the Start Time column to datetime
-        self.df['Start Time'] = pd.to_datetime(self.df['Start Time'])
+        if self.col_check('Start Time'):
+            # convert the Start Time column to datetime
+            self.df['Start Time'] = pd.to_datetime(self.df['Start Time'])
 
-        # extract month and day of week from Start Time to create new columns
-        self.df['Month'] = self.df['Start Time'].dt.month
-        self.df['Day of week'] = self.df['Start Time'].dt.day_name()
+            # extract Month and Day of Week from Start Time to create new columns
+            self.df['Month'] = self.df['Start Time'].dt.month
+            self.df['Day of week'] = self.df['Start Time'].dt.day_name()
+
+        if self.col_check('Birth Year'):
+            # extract Age from Birth Year to create new column
+            self.df['Age'] = self.df['Birth Year'].astype('Int64').apply(self.to_age)
 
         # getting the corresponding int type numpy array
         months = np.array(list(months)).astype(int)
@@ -347,6 +366,23 @@ class StatisticsBikeshare:
             print('Earliest year of birth among participants:\n  {}\n'.format(self.df['Birth Year'].min())+'-'*10)
             print('Most recent year of birth among participants:\n  {}\n'.format(self.df['Birth Year'].max())+'-'*10)
             print('Most common year of birth among participants:\n  {}\n'.format(self.df['Birth Year'].mode()[0])+'-'*10)
+
+            # creating new DataFrame for transparency 
+            df_age = pd.DataFrame(self.df.groupby(['Age', 'Month'])['Trip Duration'].mean()).reset_index()
+            print('Average trip duration among participants\' younger than 20 years\':\n {}\n'.format(df_age[['Age', 'Trip Duration', 'Month']].loc[df_age['Age'] < 20])+'-'*10)
+
+            # plot for Avg. Trip Duration distributed by age groups
+            plt.plot(df_age['Month'].loc[(df_age['Age'] < 30)], df_age['Trip Duration'].loc[(df_age['Age'] < 30)], 'm.', label = 'age < 30')
+            plt.plot(df_age['Month'].loc[(df_age['Age'] > 30) & (df_age['Age'] < 60)],
+                     df_age['Trip Duration'].loc[(df_age['Age'] > 30) & (df_age['Age'] < 60)], 'b.', alpha = 0.5, label = '30 < age < 60')
+            plt.plot(df_age['Month'].loc[(df_age['Age'] > 60) & (df_age['Age'] < 90)],
+                     df_age['Trip Duration'].loc[(df_age['Age'] > 60) & (df_age['Age'] < 90)], 'g.', alpha = 0.5, label = '60 < age < 90')
+            plt.plot(df_age['Month'].loc[(df_age['Age'] > 90)], df_age['Trip Duration'].loc[(df_age['Age'] > 90)], 'r.', alpha = 0.5, label = 'age > 90')
+            plt.title('Avg.Trip Duration by Month and Age groups\n age < 30, 30 < age < 60, 60 < age < 90, 90 < age')
+            plt.ylabel('Trip Duration')
+            plt.xlabel('Months')
+            plt.legend()
+            plt.show()
         else:
             print('No birth year data to share.\n'+'-'*10)
 
@@ -354,7 +390,7 @@ class StatisticsBikeshare:
             # average trip duration by month distributed by gender
             print('Avg. Trip Duration by Month distributed by Gender:\n  {}\n'.format(self.df.groupby(['Gender', 'Month'])['Trip Duration'].mean())+'-'*10)
 
-            # areating new DataFrame for transparency 
+            # creating new DataFrame for transparency 
             df_gender = pd.DataFrame(self.df.groupby(['Gender', 'Month'])['Trip Duration'].mean()).reset_index()
 
             # plot for Avg. Trip Duration by Month distributed by Gender
@@ -370,16 +406,39 @@ class StatisticsBikeshare:
 
         print("This took %s seconds.\n" % (time.time() - start_time)+'-'*48)
 
-    def menu(self):
-        cities, months, days = self.get_filters()
-        self.df = self.load_data(cities, months, days)
-        self.time_stats()
-        self.station_stats()
-        self.trip_duration_stats()
-        self.user_stats()
+    default_input_msg = '\nDo you want to check the first 5 rows of the dataset related to the chosen city?\nEnter (y)yes or (n)no.\n'
+    default_print_msg = '\nFirs 5 rows of dataset:\n{}\n'
+
+    def show_five_rows(self):
+        next_five_input_msg = '\nDo you want to check another 5 rows of the dataset?\nEnter (y)yes or (n)no.\n'
+        next_five_print_msg = '\n Next 5 rows of dataset:\n{}\n'
         while True:
             try:
-                restart = input('\nWould you like to restart? Enter (y)yes or (n)no.\n')
+                check_five_rows = input(self.default_input_msg)
+                if check_five_rows.lower() == 'yes' or check_five_rows.lower() == 'y':
+                    self.default_input_msg = next_five_input_msg
+                    print(self.default_print_msg.format(self.df.iloc[self.start:self.stop])+'-'*48+'\n')
+                    self.default_print_msg = next_five_print_msg
+                    self.start += 5
+                    self.stop += 5
+                    self.show_five_rows()
+                elif check_five_rows.lower() == 'no' or check_five_rows.lower() == 'n':
+                    print('\nShowing no more of dataset\n'+'-'*48+'\n')
+                    self.restart_kernel()
+                else:
+                    raise InvalidInput
+            except InvalidInput:
+                print('!! Type valid input please !! (eg.: \'y\' | \'yes\' | \'n\' | \'no\')\n\n'+'-'*48+'\n')
+                continue
+
+    def restart_kernel(self):
+        self.start = 0
+        self.stop = 5
+        self.default_input_msg = '\nDo you want to check the first 5 rows of the dataset related to the chosen city?\nEnter (y)yes or (n)no.\n'
+        self.default_print_msg = '\nFirs 5 rows of dataset:\n{}\n'
+        while True:
+            try:
+                restart = input('\nWould you like to restart the kernel? Enter (y)yes or (n)no.\n')
                 if restart.lower() == 'yes' or restart.lower() == 'y':
                     print('\nRestart.\n'+'-'*48+'\n')
                     os.system('cls' if os.name == 'nt' else 'clear')
@@ -392,6 +451,16 @@ class StatisticsBikeshare:
             except InvalidInput:
                 print('!! Type valid input please !! (eg.: \'y\' | \'yes\' | \'n\' | \'no\')\n\n'+'-'*48+'\n')
                 continue
+
+    def menu(self):
+        cities, months, days = self.get_filters()
+        self.df = self.load_data(cities, months, days)
+        self.time_stats()
+        self.station_stats()
+        self.trip_duration_stats()
+        self.user_stats()
+        self.show_five_rows()
+        
 
 if __name__ == "__main__":
     bike_stat = StatisticsBikeshare()
